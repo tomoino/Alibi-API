@@ -1,1 +1,1 @@
-web: main
+server: main
