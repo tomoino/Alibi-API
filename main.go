@@ -81,16 +81,17 @@ func main() {
 
 	// Routing
 	e.GET("/event/:id", getEventById)
-	e.GET("/create", createEvent)
+	e.POST("/create", createEvent)
+	e.GET("/update/:id", updateEventById)
 
 	// Port番号を関数から取得
 	e.Logger.Fatal(e.Start(port()))
 }
 
-// eventsテーブルのレコードを全件取得
+// eventsテーブルのレコードをid指定で取得
 func getEventById(c echo.Context) error {
 	var event Event
-	// contentテーブルのレコードを全件取得
+
 	id := c.Param("id")
 	db.Find(&event, id)
 	// 取得したデータをJSONにして返却
@@ -100,8 +101,23 @@ func getEventById(c echo.Context) error {
 // eventsテーブルにレコードを登録
 func createEvent(c echo.Context) error {
 	event := Event{Time: time.Now(), Location: "リビング", CreatedAt: time.Now(), UpdatedAt: time.Now()}
-	// contentテーブルのレコードを全件取得
 	db.Create(&event)
 	// 取得したデータをJSONにして返却
 	return c.String(http.StatusOK, "record has been created")
+}
+
+// eventsテーブルのレコードを全件取得
+func updateEventById(c echo.Context) error {
+	var event Event
+	// var event := Event{Time: time.Now(), Location: "リビング", CreatedAt: time.Now(), UpdatedAt: time.Now()}
+
+	id := c.Param("id")
+	db.Find(&event, id)
+
+	event.Event = "夕食"
+
+	db.Save(&event)
+
+	// 取得したデータをJSONにして返却
+	return c.JSON(http.StatusOK, "record has been updated")
 }
