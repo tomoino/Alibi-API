@@ -80,9 +80,11 @@ func main() {
 	// })
 
 	// Routing
+	// フロントエンドがまだないので全部GET。あとでデータ取得以外はPOSTに直す。
 	e.GET("/event/:id", getEventById)
-	e.POST("/create", createEvent)
+	e.GET("/create", createEvent)
 	e.GET("/update/:id", updateEventById)
+	e.GET("/delete/:id", deleteEventById)
 
 	// Port番号を関数から取得
 	e.Logger.Fatal(e.Start(port()))
@@ -100,13 +102,13 @@ func getEventById(c echo.Context) error {
 
 // eventsテーブルにレコードを登録
 func createEvent(c echo.Context) error {
-	event := Event{Time: time.Now(), Location: "リビング", CreatedAt: time.Now(), UpdatedAt: time.Now()}
+	event := Event{Time: time.Now(), Location: "風呂", Event: "入浴"}
 	db.Create(&event)
 	// 取得したデータをJSONにして返却
 	return c.String(http.StatusOK, "record has been created")
 }
 
-// eventsテーブルのレコードを全件取得
+// eventsテーブルのレコードをid指定で更新
 func updateEventById(c echo.Context) error {
 	var event Event
 	// var event := Event{Time: time.Now(), Location: "リビング", CreatedAt: time.Now(), UpdatedAt: time.Now()}
@@ -120,4 +122,17 @@ func updateEventById(c echo.Context) error {
 
 	// 取得したデータをJSONにして返却
 	return c.JSON(http.StatusOK, "record has been updated")
+}
+
+// eventsテーブルのレコードをid指定で削除
+func deleteEventById(c echo.Context) error {
+	// var event Event
+
+	id := c.Param("id")
+	// db.Find(&event, id)
+
+	db.Delete(&Event{}, id)
+
+	// 取得したデータをJSONにして返却
+	return c.JSON(http.StatusOK, "record has been deleted")
 }
