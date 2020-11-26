@@ -102,7 +102,7 @@ func getEventById(c echo.Context) error {
 
 // eventsテーブルにレコードを登録
 func createEvent(c echo.Context) error {
-	event := Event{Time: time.Now(), Location: "風呂", Event: "入浴"}
+	event := Event{Time: time.Now(), Location: "リビング", Event: "朝食"}
 	db.Create(&event)
 	// 取得したデータをJSONにして返却
 	return c.String(http.StatusOK, "record has been created")
