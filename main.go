@@ -78,17 +78,30 @@ func main() {
 	// 	//databaseUrl := os.Getenv("DATABASE_URL")
 	// 	return c.String(http.StatusOK, "Hello, World!")
 	// })
-	e.GET("/events", getAllEvents)
+
+	// Routing
+	e.GET("/event/:id", getEventById)
+	e.GET("/create", createEvent)
 
 	// Port番号を関数から取得
 	e.Logger.Fatal(e.Start(port()))
 }
 
 // eventsテーブルのレコードを全件取得
-func getAllEvents(c echo.Context) error {
+func getEventById(c echo.Context) error {
 	var event Event
 	// contentテーブルのレコードを全件取得
-	db.Find(&event)
+	id := c.Param("id")
+	db.Find(&event, id)
 	// 取得したデータをJSONにして返却
 	return c.JSON(http.StatusOK, event)
+}
+
+// eventsテーブルにレコードを登録
+func createEvent(c echo.Context) error {
+	event := Event{Time: time.Now(), Location: "リビング", CreatedAt: time.Now(), UpdatedAt: time.Now()}
+	// contentテーブルのレコードを全件取得
+	db.Create(&event)
+	// 取得したデータをJSONにして返却
+	return c.String(http.StatusOK, "record has been created")
 }
