@@ -1,9 +1,12 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"os"
 
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,6 +20,15 @@ func port() string {
 	}
 
 	return ":" + port
+}
+
+func connect() {
+	databaseUrl := os.Getenv("DATABASE_URL")
+	db, err := gorm.Open("postgres", databaseUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 }
 
 func main() {
