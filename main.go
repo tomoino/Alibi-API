@@ -36,15 +36,9 @@ func connect() {
 func main() {
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
-		err := godotenv.Load(fmt.Sprintf("./%s.env", os.Getenv("GO_ENV")))
-		databaseUrl := ""
-		if err != nil {
-			// .env読めなかった場合の処理
-			databaseUrl = "ENVないよ！"
-		} else {
-			databaseUrl = os.Getenv("DATABASE_URL")
-		}
-		return c.String(http.StatusOK, "Hello, World!"+databaseUrl)
+		godotenv.Load(fmt.Sprintf("./%s.env", os.Getenv("GO_ENV")))
+		//databaseUrl := os.Getenv("DATABASE_URL")
+		return c.String(http.StatusOK, "Hello, World!")
 	})
 
 	// Port番号を関数から取得
