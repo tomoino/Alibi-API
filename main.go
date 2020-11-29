@@ -11,6 +11,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 // モデルの定義
@@ -21,6 +22,13 @@ type Event struct {
 	Event     string
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+// request jsonの定義
+type Request struct {
+	Time     time.Time `json:"time"`
+	Location string    `json:"location"`
+	Event    string    `json:"event"`
 }
 
 // DBのインスタンスをグローバル変数に格納
@@ -40,20 +48,6 @@ func port() string {
 	return ":" + port
 }
 
-// func connect() {
-// 	err := godotenv.Load(fmt.Sprintf("./%s.env", os.Getenv("GO_ENV")))
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	databaseUrl := os.Getenv("DATABASE_URL")
-// 	db, err := gorm.Open("postgres", databaseUrl)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	defer db.Close()
-// }
-
 func main() {
 	var err error
 	err = godotenv.Load(fmt.Sprintf("./%s.env", os.Getenv("GO_ENV")))
@@ -69,28 +63,20 @@ func main() {
 	defer db.Close()
 
 	e := echo.New()
-	// e.GET("/", func(c echo.Context) error {
-	// 	connect()
-	// 	// err := godotenv.Load(fmt.Sprintf("./%s.env", os.Getenv("GO_ENV")))
-	// 	// if err != nil {
-	// 	// 	log.Fatal(err)
-	// 	// }
-	// 	//databaseUrl := os.Getenv("DATABASE_URL")
-	// 	return c.String(http.StatusOK, "Hello, World!")
-	// })
+	e.Use(middleware.CORS())
 
 	// Routing
 	// フロントエンドがまだないので全部GET。あとでデータ取得以外はPOSTに直す。
 	e.GET("/event/:id", getEventById)
-	e.GET("/create", createEvent)
-	e.GET("/update/:id", updateEventById)
-	e.GET("/delete/:id", deleteEventById)
+	e.POST("/create", createEvent)
+	e.POST("/update/:id", updateEventById)
+	e.DELETE("/delete/:id", deleteEventById)
 
 	// Port番号を関数から取得
 	e.Logger.Fatal(e.Start(port()))
 }
 
-// eventsテーブルのレコードをid指定で取得
+// GET : eventsテーブルのレコードをid指定で取得
 func getEventById(c echo.Context) error {
 	var event Event
 
@@ -100,23 +86,57 @@ func getEventById(c echo.Context) error {
 	return c.JSON(http.StatusOK, event)
 }
 
-// eventsテーブルにレコードを登録
+// POST : eventsテーブルにレコードを登録
 func createEvent(c echo.Context) error {
-	event := Event{Time: time.Now(), Location: "リビング", Event: "朝食"}
+	// リクエストをbind
+	post := new(Request)
+	c.Bind(post)
+
+	var event Event
+
+	// request json に応じて値を更新
+	if post.Time.IsZero() != true {
+		event.Time = post.Time
+	} else {
+		event.Time = time.Now() // 時間は入っていない場合は現在時刻を入れる
+	}
+
+	if len(post.Event) > 0 {
+		event.Event = post.Event
+	}
+
+	if len(post.Location) > 0 {
+		event.Location = post.Location
+	}
+
 	db.Create(&event)
 	// 取得したデータをJSONにして返却
 	return c.String(http.StatusOK, "record has been created")
 }
 
-// eventsテーブルのレコードをid指定で更新
+// POST : eventsテーブルのレコードをid指定で更新
 func updateEventById(c echo.Context) error {
-	var event Event
-	// var event := Event{Time: time.Now(), Location: "リビング", CreatedAt: time.Now(), UpdatedAt: time.Now()}
+	// リクエストをbind
+	post := new(Request)
+	c.Bind(post)
 
+	var event Event
+	// idで更新するレコードを取得
 	id := c.Param("id")
 	db.Find(&event, id)
 
-	event.Event = "夕食"
+	// request json に応じて値を更新
+	if post.Time.IsZero() != true {
+		event.Time = post.Time
+	}
+
+	if len(post.Event) > 0 {
+		event.Event = post.Event
+	}
+
+	if len(post.Location) > 0 {
+		event.Location = post.Location
+	}
 
 	db.Save(&event)
 
@@ -124,12 +144,9 @@ func updateEventById(c echo.Context) error {
 	return c.JSON(http.StatusOK, "record has been updated")
 }
 
-// eventsテーブルのレコードをid指定で削除
+// DELETE : eventsテーブルのレコードをid指定で削除
 func deleteEventById(c echo.Context) error {
-	// var event Event
-
 	id := c.Param("id")
-	// db.Find(&event, id)
 
 	db.Delete(&Event{}, id)
 
