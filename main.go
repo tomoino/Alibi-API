@@ -68,6 +68,7 @@ func main() {
 	// Routing
 	// フロントエンドがまだないので全部GET。あとでデータ取得以外はPOSTに直す。
 	e.GET("/event/:id", getEventById)
+	e.GET("/events", getAllEvents)
 	e.POST("/create", createEvent)
 	e.POST("/update/:id", updateEventById)
 	e.DELETE("/delete/:id", deleteEventById)
@@ -82,6 +83,15 @@ func getEventById(c echo.Context) error {
 
 	id := c.Param("id")
 	db.Find(&event, id)
+	// 取得したデータをJSONにして返却
+	return c.JSON(http.StatusOK, event)
+}
+
+// GET : eventsテーブルのレコードを全件取得
+func getAllEvents(c echo.Context) error {
+	var event []Event
+
+	db.Find(&event)
 	// 取得したデータをJSONにして返却
 	return c.JSON(http.StatusOK, event)
 }
