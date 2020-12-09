@@ -136,9 +136,9 @@ func updateEventById(c echo.Context) error {
 	db.Find(&event, id)
 
 	// request json に応じて値を更新
-	if post.Time.IsZero() != true {
-		event.Time = post.Time
-	}
+	// if post.Time.IsZero() != true {
+	event.Time = post.Time
+	// }
 
 	if len(post.Event) > 0 {
 		event.Event = post.Event
@@ -147,6 +147,8 @@ func updateEventById(c echo.Context) error {
 	if len(post.Location) > 0 {
 		event.Location = post.Location
 	}
+
+	event.UpdatedAt = time.Now()
 
 	db.Save(&event)
 
