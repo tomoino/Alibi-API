@@ -22,13 +22,17 @@ type Event struct {
 	Event     string
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	Longitude float64
+	Latitude  float64
 }
 
 // request jsonの定義
 type Request struct {
-	Time     time.Time `json:"time"`
-	Location string    `json:"location"`
-	Event    string    `json:"event"`
+	Time      time.Time `json:"time"`
+	Location  string    `json:"location"`
+	Event     string    `json:"event"`
+	Longitude float64   `json:"longitude"`
+	Latitude  float64   `json:"latitude"`
 }
 
 // DBのインスタンスをグローバル変数に格納
@@ -119,6 +123,14 @@ func createEvent(c echo.Context) error {
 		event.Location = post.Location
 	}
 
+	if post.Longitude > 0.0 {
+		event.Longitude = post.Longitude
+	}
+
+	if post.Latitude > 0.0 {
+		event.Latitude = post.Latitude
+	}
+
 	db.Create(&event)
 	// 取得したデータをJSONにして返却
 	return c.String(http.StatusOK, "record has been created")
@@ -148,6 +160,14 @@ func updateEventById(c echo.Context) error {
 
 	if len(post.Location) > 0 {
 		event.Location = post.Location
+	}
+
+	if post.Longitude > 0.0 {
+		event.Longitude = post.Longitude
+	}
+
+	if post.Latitude > 0.0 {
+		event.Latitude = post.Latitude
 	}
 
 	db.Save(&event)
