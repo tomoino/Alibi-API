@@ -137,7 +137,8 @@ func updateEventById(c echo.Context) error {
 
 	// request json に応じて値を更新
 	// if post.Time.IsZero() != true {
-	event.Time = post.Time
+	// event.Time = post.Time
+	event.Time = time.Now()
 	// }
 
 	if len(post.Event) > 0 {
