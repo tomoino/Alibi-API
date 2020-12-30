@@ -72,6 +72,7 @@ func main() {
 	// Routing
 	// フロントエンドがまだないので全部GET。あとでデータ取得以外はPOSTに直す。
 	e.GET("/event/:id", getEventById)
+	e.GET("/event/current/", getCurrentEvent)
 	e.GET("/events", getAllEvents)
 	e.POST("/create", createEvent)
 	e.POST("/update/:id", updateEventById)
@@ -87,6 +88,18 @@ func getEventById(c echo.Context) error {
 
 	id := c.Param("id")
 	db.Find(&event, id)
+	// 取得したデータをJSONにして返却
+	return c.JSON(http.StatusOK, event)
+}
+
+// GET : アクセス時刻に対応する10分区間のレコードを取得する
+func getCurrentEvent(c echo.Context) error {
+	var event Event
+
+	now := time.Now()
+	t := now.Add(-10 * time.Minute) // 10分前の時刻
+
+	db.Where("time BETWEEN ? AND ?", t, now).Find(&event)
 	// 取得したデータをJSONにして返却
 	return c.JSON(http.StatusOK, event)
 }
