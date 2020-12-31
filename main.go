@@ -170,11 +170,11 @@ func updateEventById(c echo.Context) error {
 	db.Find(&event, id)
 
 	// request json に応じて値を更新
-	if post.Time.IsZero() != true {
-		event.Time = post.Time
-	} else {
-		event.Time = time.Now() // 時間は入っていない場合は現在時刻を入れる
-	}
+	// if post.Time.IsZero() != true {
+	// 	event.Time = post.Time
+	// } else {
+	// 	event.Time = time.Now() // 時間は入っていない場合は現在時刻を入れる
+	// }
 
 	if len(post.Event) > 0 {
 		event.Event = post.Event
