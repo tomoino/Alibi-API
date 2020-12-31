@@ -73,7 +73,7 @@ func main() {
 	// フロントエンドがまだないので全部GET。あとでデータ取得以外はPOSTに直す。
 	e.GET("/event/:id", getEventById)
 	e.GET("/event/current/", getCurrentEvent)
-	e.GET("/events", getAllEvents)
+	e.GET("/events", getEvents)
 	e.POST("/create", createEvent)
 	e.POST("/update/:id", updateEventById)
 	e.DELETE("/delete/:id", deleteEventById)
@@ -104,11 +104,20 @@ func getCurrentEvent(c echo.Context) error {
 	return c.JSON(http.StatusOK, event)
 }
 
-// GET : eventsテーブルのレコードを全件取得
-func getAllEvents(c echo.Context) error {
+// GET : eventsテーブルのレコードを時間指定取得または全件取得
+func getEvents(c echo.Context) error {
 	var event []Event
 
-	db.Find(&event)
+	// 時間指定 2020-12-11_12:00:00 の形式
+	from := c.QueryParam("from")
+	to := c.QueryParam("to")
+
+	if len(from) > 0 && len(to) > 0 {
+		db.Where("time BETWEEN ? AND ?", from, to).Find(&event)
+	} else {
+		db.Find(&event)
+	}
+
 	// 取得したデータをJSONにして返却
 	return c.JSON(http.StatusOK, event)
 }
