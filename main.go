@@ -113,9 +113,9 @@ func getEvents(c echo.Context) error {
 	to := c.QueryParam("to")
 
 	if len(from) > 0 && len(to) > 0 {
-		db.Where("time BETWEEN ? AND ?", from, to).Find(&event)
+		db.Order("time asc").Where("time BETWEEN ? AND ?", from, to).Find(&event)
 	} else {
-		db.Find(&event)
+		db.Order("age asc").Find(&event)
 	}
 
 	// 取得したデータをJSONにして返却
